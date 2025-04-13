@@ -1,7 +1,13 @@
 const serverUrl = "https://temp-test-server-anton-tonic.onrender.com/chat";
 
 let chats = JSON.parse(localStorage.getItem("chats")) || {};
-let currentChatId = Object.keys(chats)[0] || createNewChat();
+let currentChatId;
+
+if (Object.keys(chats).length > 0) {
+  currentChatId = Object.keys(chats)[0];
+} else {
+  createNewChat();
+}
 
 function createNewChat() {
   const id = "chat_" + Date.now();
