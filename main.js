@@ -331,6 +331,10 @@ input.addEventListener("keydown", (e) => {
 });
 
 // Инициализация
-document.getElementById("newChatBtn").onclick = createNewChat;
-renderChatList();
-renderMessages();
+window.onload = () => {
+  document.getElementById("newChatBtn").onclick = createNewChat;
+  renderChatList();
+  renderMessages();
+
+  const input = document.getElementById("userInput");
+};
