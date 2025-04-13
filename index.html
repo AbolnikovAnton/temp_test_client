@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Microsoft CoPilot</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>Чаты</h2>
+        <button id="newChatBtn">+ Новый</button>
+        <div id="chatList"></div>
+        <div class="usage-stats" id="usageStats">
+          💰 Потрачено: $0.000<br />
+          🔁 Вход: 0 токенов<br />
+          📤 Выход: 0 токенов
+        </div>
+      </aside>
+
+      <main class="chat-container">
+        <header>
+          <h1>Microsoft CoPilot</h1>
+        </header>
+
+        <div id="chatBox" class="chat-box"></div>
+        <div id="typing" class="typing-indicator hidden">GPT печатает...</div>
+
+        <div class="input-container">
+          <textarea
+            id="userInput"
+            maxlength="4000"
+            placeholder="Напиши сообщение..."
+          ></textarea>
+          <div class="char-counter"><span id="charCount">0</span> / 10000</div>
+          <button onclick="sendMessage()">Отправить</button>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
