@@ -109,9 +109,17 @@ header h1 {
   color: #c7f0ff;
 }
 
-.msg.bot {
+.msg.assistant {
   text-align: left;
   color: #90ee90;
+}
+
+.empty-state {
+  color: #9aa0a6;
+  text-align: center;
+  padding: 24px 8px;
+  border: 1px dashed #333;
+  border-radius: 8px;
 }
 
 .typing-indicator {
@@ -160,6 +168,11 @@ textarea::placeholder {
 
 .input-container button:hover {
   background: #005fa3;
+}
+
+.input-container button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* Markdown стили */
@@ -226,4 +239,19 @@ textarea::placeholder {
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #333;
+}
+
+.chat-list-item {
+  transition: background 0.2s ease;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.chat-list-item:hover {
+  background-color: #1f2430;
+}
+
+.chat-list-item.active {
+  background-color: #2a2f3a;
+  outline: 2px solid #4f8cff;
 }
