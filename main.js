@@ -509,7 +509,12 @@ function updateCharCounter() {
   }
 }
 
-window.onload = () => {
+let isAppInitialized = false;
+
+function initApp() {
+  if (isAppInitialized) return;
+  isAppInitialized = true;
+
   const input = document.getElementById("userInput");
   const newChatBtn = document.getElementById("newChatBtn");
   const sendBtn = document.getElementById("sendBtn");
@@ -520,6 +525,11 @@ window.onload = () => {
 
   if (sendBtn) {
     sendBtn.onclick = sendMessage;
+    sendBtn.addEventListener("click", sendMessage);
+    sendBtn.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      sendMessage();
+    });
   }
 
   if (input) {
@@ -537,4 +547,12 @@ window.onload = () => {
   renderEmptyState();
   updateStatsUI();
   updateCharCounter();
-};
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+
+window.addEventListener("load", initApp);
