@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Microsoft CoPilot</title>
@@ -8,13 +8,13 @@
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <h2>Чаты</h2>
-        <button id="newChatBtn">+ Новый</button>
+        <h2>Chats</h2>
+        <button id="newChatBtn">+ New</button>
         <div id="chatList"></div>
         <div class="usage-stats" id="usageStats">
-          💰 Потрачено: $0.000<br />
-          🔁 Вход: 0 токенов<br />
-          📤 Выход: 0 токенов
+          💰 Spent: $0.0000<br />
+          🔁 Input: 0 tokens<br />
+          📤 Output: 0 tokens
         </div>
       </aside>
 
@@ -24,21 +24,24 @@
         </header>
 
         <div id="chatBox" class="chat-box"></div>
-        <div id="typing" class="typing-indicator hidden">GPT печатает...</div>
+        <div id="typing" class="typing-indicator hidden">
+          Assistant is typing...
+        </div>
 
         <div class="input-container">
           <textarea
             id="userInput"
-            maxlength="4000"
-            placeholder="Напиши сообщение..."
+            maxlength="10000"
+            placeholder="Write a message..."
           ></textarea>
           <div class="char-counter"><span id="charCount">0</span> / 10000</div>
-          <button onclick="sendMessage()">Отправить</button>
+          <button id="sendBtn">Send</button>
         </div>
       </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
     <script src="main.js"></script>
   </body>
 </html>

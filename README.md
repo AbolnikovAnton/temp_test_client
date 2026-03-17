@@ -1,81 +1,49 @@
 # Temp Test Client
 
-Frontend-only chat client with local chat history, Markdown rendering, and a simple sidebar-based multi-chat UI.
+Client-side chat app (ChatGPT-style UI) built with plain JavaScript.
 
 ## Live Demo
 
-The project is publicly available here:
+https://abolnikovanton.github.io/temp_test_client/
 
-- https://abolnikovanton.github.io/temp_test_client/
+## Scope Of This Repository
 
-## Repository Scope
+This repository contains only the frontend client.
 
-This repository contains only the client application.
+- UI, chat logic, local persistence, Markdown rendering
+- No backend code in this repo
+- Backend API is hosted in a separate neighboring repository
 
-- Frontend: this repo
-- Backend API: separate neighboring repository
+## What It Does
 
-The client sends requests to a remote API endpoint and does not include server-side code.
-
-## Features
-
-- Multiple chats with quick switching
-- Chat rename and delete actions
+- Multi-chat support with localStorage persistence
+- Rename / delete chats
 - Export and import chat history as JSON
-- Markdown rendering for assistant responses
-- Typing indicator
-- Estimated token and cost stats
-- Automatic long-message chunking
-- Optional conversation summarization flow
-
-## Tech Stack
-
-- HTML5
-- CSS3
-- Vanilla JavaScript
-- Marked (Markdown parser)
-
-## Run Locally
-
-### Option 1: Node.js
-
-```bash
-npx serve . -l 5501
-```
-
-Open:
-
-- http://localhost:5501
-
-### Option 2: Python
-
-```bash
-python -m http.server 5501
-```
-
-Open:
-
-- http://localhost:5501
+- Send messages to remote API endpoint
+- Render assistant replies as Markdown
+- Sanitize Markdown HTML output with DOMPurify
+- Split very long user messages into chunks automatically
+- Rolling conversation summary for long chats
+- Token estimation and cost tracking in UI
+- Typing indicator and Enter-to-send behavior
 
 ## API Endpoint
 
-The client uses this endpoint in [main.js](main.js):
+Configured in [main.js](main.js):
 
 ```js
 const serverUrl = "https://temp-test-server-anton-tonic.onrender.com/chat";
 ```
 
-Update it if your backend URL changes.
-
 ## Backend Warm-Up Note
 
 The backend runs on a free hosting plan.
 
-After a period of inactivity, the server may go to sleep. In this case, the first request can take noticeably longer while the service wakes up.
+After idle time, the service may sleep. The first request can be slower while the server wakes up.
 
-Once the first response is received, the app usually works in normal speed mode.
+Once warmed up, responses should return at normal speed.
 
-## Project Structure
+## Project Files
 
 ```text
 .
@@ -85,26 +53,30 @@ Once the first response is received, the app usually works in normal speed mode.
 └─ README.md
 ```
 
-## Quick Verification
+## Local Run (Optional)
 
-1. Start a local static server.
-2. Open the app in your browser.
-3. Create a new chat.
-4. Send a message.
-5. Confirm that a response appears from the API.
+The app is publicly available via GitHub Pages, so local run is optional.
+
+If you still want to run it locally, use any static file server, for example:
+
+```bash
+npx serve . -l 5501
+```
+
+Then open `http://localhost:5501`.
 
 ## Troubleshooting
 
-1. Send button does nothing
+1. Send button appears to do nothing
 
-- Open browser DevTools (F12) and check Console for JavaScript errors.
-- Verify that the remote API URL is reachable.
+- Open DevTools Console (F12) and check for JS errors.
+- Verify network requests are sent to `/chat`.
 
-2. Network request fails
+2. API returns server error
 
-- Confirm backend availability.
-- Check CORS and HTTPS setup on the backend side.
+- Check backend logs in the backend repository/deploy.
+- Re-check backend environment variables (OpenAI key, model, etc.).
 
-3. Blank or broken page
+3. First response is slow
 
-- Run through a local server, not by opening the HTML file directly.
+- Expected on free hosting after inactivity (cold start).
