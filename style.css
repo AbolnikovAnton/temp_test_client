@@ -54,6 +54,7 @@ body {
 #chatList {
   flex: 1;
   overflow-y: auto;
+  padding-right: 2px;
 }
 
 #chatList div {
@@ -147,6 +148,7 @@ header h1 {
 
 textarea {
   flex: 1;
+  min-width: 0;
   height: 60px;
   padding: 12px;
   font-size: 18px;
@@ -155,6 +157,27 @@ textarea {
   border: none;
   outline: none;
   resize: none;
+  scrollbar-width: thin;
+  scrollbar-color: #4a5161 #1a1a1a;
+}
+
+textarea::-webkit-scrollbar {
+  width: 10px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-left: 1px solid #2b2b2b;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: #4a5161;
+  border-radius: 10px;
+  border: 2px solid #1a1a1a;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: #5d6577;
 }
 
 textarea::placeholder {
@@ -169,6 +192,9 @@ textarea::placeholder {
   border: none;
   cursor: pointer;
   transition: 0.2s;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .input-container button:hover {
@@ -247,34 +273,88 @@ textarea::placeholder {
 }
 
 .chat-list-item {
-  transition: background 0.2s ease;
-  padding: 5px;
-  border-radius: 8px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid transparent;
 }
 
 .chat-list-item:hover {
-  background-color: #1f2430;
+  background-color: #1d2230;
+  border-color: #343d53;
 }
 
 .chat-list-item.active {
-  background-color: #2a2f3a;
-  outline: 2px solid #4f8cff;
+  background-color: #22293a;
+  border-color: #4f8cff;
+  box-shadow: inset 0 0 0 1px rgba(79, 140, 255, 0.35);
+}
+
+.chat-list-item > button:first-child {
+  background: #242a36;
+  color: #d4dae8;
+  border: 1px solid #363f56;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.25;
+  margin-right: 6px;
+}
+
+.chat-list-item > button:first-child:hover {
+  background: #2b3446;
+  color: #eef2ff;
+}
+
+.chat-list-item > div {
+  display: flex;
+  gap: 5px;
+}
+
+.chat-list-item > div > button {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  margin: 0;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #202735;
+  color: #c9d1e0;
+  border: 1px solid #353f56;
+  border-radius: 7px;
+}
+
+.chat-list-item > div > button:hover {
+  background: #2a3346;
+  color: #eef2ff;
 }
 
 @media (max-width: 768px) {
   body {
     font-size: 16px;
     overflow: hidden;
+    padding: 8px 10px;
+    border-radius: 8px;
   }
 
   .layout {
     display: block;
-    height: 100svh;
+    color: #d7e0ec;
+    background: rgba(70, 98, 134, 0.14);
+    border: 1px solid rgba(99, 132, 176, 0.28);
     min-height: 100svh;
   }
 
   .sidebar {
-    display: none;
+    color: #bcc4d3;
+    background: rgba(118, 124, 138, 0.12);
+    border: 1px solid rgba(145, 152, 168, 0.26);
   }
 
   .chat-container {
