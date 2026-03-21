@@ -121,6 +121,8 @@ header h1 {
   color: #e1e8f5;
   background: #243349;
   border-color: #375271;
+  width: fit-content;
+  max-width: 82%;
   margin-left: auto;
 }
 
