@@ -112,12 +112,12 @@ header h1 {
 
 .msg.user {
   text-align: right;
-  color: #c7f0ff;
+  color: #c9c9c9;
 }
 
 .msg.assistant {
   text-align: left;
-  color: #90ee90;
+  color: #0077cc;
 }
 
 .empty-state {
