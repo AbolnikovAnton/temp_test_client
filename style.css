@@ -107,17 +107,29 @@ header h1 {
 
 .msg {
   margin-bottom: 12px;
-  line-height: 1.4;
+  line-height: 1.45;
+  max-width: 82%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  word-break: break-word;
 }
 
 .msg.user {
   text-align: right;
-  color: #d7deea;
+  color: #e1e8f5;
+  background: #243349;
+  border-color: #375271;
+  margin-left: auto;
 }
 
 .msg.assistant {
   text-align: left;
-  color: #b8c3d4;
+  color: #c3ccd9;
+  background: #1d232f;
+  border-color: #313b4d;
+  margin-right: auto;
 }
 
 .empty-state {
