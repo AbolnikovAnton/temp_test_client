@@ -525,11 +525,6 @@ function initApp() {
 
   if (sendBtn) {
     sendBtn.onclick = sendMessage;
-    sendBtn.addEventListener("click", sendMessage);
-    sendBtn.addEventListener("touchend", (e) => {
-      e.preventDefault();
-      sendMessage();
-    });
   }
 
   if (input) {
