@@ -55,6 +55,27 @@ body {
   flex: 1;
   overflow-y: auto;
   padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #4a5161 #1a1a1a;
+}
+
+#chatList::-webkit-scrollbar {
+  width: 10px;
+}
+
+#chatList::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-left: 1px solid #2b2b2b;
+}
+
+#chatList::-webkit-scrollbar-thumb {
+  background: #4a5161;
+  border-radius: 10px;
+  border: 2px solid #1a1a1a;
+}
+
+#chatList::-webkit-scrollbar-thumb:hover {
+  background: #5d6577;
 }
 
 #chatList div {
@@ -353,22 +374,18 @@ textarea::placeholder {
   body {
     font-size: 16px;
     overflow: hidden;
-    padding: 8px 10px;
-    border-radius: 8px;
+    height: 100svh;
+    min-height: 100svh;
   }
 
   .layout {
     display: block;
-    color: #d7e0ec;
-    background: rgba(70, 98, 134, 0.14);
-    border: 1px solid rgba(99, 132, 176, 0.28);
+    height: 100svh;
     min-height: 100svh;
   }
 
   .sidebar {
-    color: #bcc4d3;
-    background: rgba(118, 124, 138, 0.12);
-    border: 1px solid rgba(145, 152, 168, 0.26);
+    display: none;
   }
 
   .chat-container {
@@ -377,6 +394,7 @@ textarea::placeholder {
     padding: 0;
     display: flex;
     flex-direction: column;
+    border: none;
   }
 
   header,
@@ -406,7 +424,7 @@ textarea::placeholder {
   }
 
   textarea {
-    height: 52px;
+    height: 54px;
     font-size: 16px;
     padding: 10px;
   }
@@ -414,6 +432,7 @@ textarea::placeholder {
   .input-container button {
     padding: 0 16px;
     font-size: 15px;
+    touch-action: manipulation;
   }
 
   .usage-stats,
