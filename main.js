@@ -7,8 +7,9 @@ const SUMMARY_TRIGGER_MESSAGES = 12;
 const SUMMARY_TAIL_MESSAGES = 10;
 
 let chats = loadChats();
-let currentChatId = initCurrentChat();
 let isSending = false;
+let currentChatId = "";
+currentChatId = initCurrentChat();
 
 const tokenStats = {
   input: 0,
