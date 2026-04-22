@@ -117,9 +117,9 @@ function updateStatsUI() {
   if (!stats) return;
 
   stats.innerHTML = `
-    💰 Spent: $${tokenStats.cost.toFixed(4)}<br/>
-    🔁 Input: ${tokenStats.input} tokens<br/>
-    📤 Output: ${tokenStats.output} tokens
+    Spent: $${tokenStats.cost.toFixed(4)}<br/>
+    Input: ${tokenStats.input} tokens<br/>
+    Output: ${tokenStats.output} tokens
   `;
 }
 
@@ -166,6 +166,28 @@ function renderMessages() {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function getChatListTitle(chat) {
+  return (
+    chat.title ||
+    chat.messages.find((message) => message.role === "user")?.content?.slice(
+      0,
+      40,
+    ) ||
+    "New chat"
+  );
+}
+
+function getChatListPreview(chat) {
+  for (let i = chat.messages.length - 1; i >= 0; i -= 1) {
+    const content = chat.messages[i]?.content?.trim();
+    if (content) {
+      return content.replace(/\s+/g, " ").slice(0, 72);
+    }
+  }
+
+  return "Empty conversation";
+}
+
 function renderChatList() {
   const chatList = document.getElementById("chatList");
   if (!chatList) return;
@@ -173,65 +195,72 @@ function renderChatList() {
   chatList.innerHTML = "";
 
   Object.entries(chats).forEach(([id, chat]) => {
-    const container = document.createElement("div");
-    container.className = "chat-list-item";
-    container.style.display = "flex";
-    container.style.alignItems = "center";
-    container.style.justifyContent = "space-between";
-    container.style.marginBottom = "5px";
+    const item = document.createElement("div");
+    item.className = "chat-list-item";
 
     if (id === currentChatId) {
-      container.classList.add("active");
+      item.classList.add("active");
     }
 
-    const btn = document.createElement("button");
-    const title =
-      chat.title ||
-      chat.messages.find((m) => m.role === "user")?.content?.slice(0, 40) ||
-      "New chat";
-
-    btn.textContent = title;
-    btn.style.flex = "1";
-    btn.onclick = () => {
+    const mainButton = document.createElement("button");
+    mainButton.type = "button";
+    mainButton.className = "chat-list-main";
+    mainButton.onclick = () => {
       currentChatId = id;
       renderChatList();
       renderMessages();
     };
 
-    const tools = document.createElement("div");
-    tools.style.display = "flex";
-    tools.style.gap = "5px";
+    const title = document.createElement("span");
+    title.className = "chat-list-title";
+    title.textContent = getChatListTitle(chat);
 
-    const renameBtn = document.createElement("button");
-    renameBtn.textContent = "✏️";
-    renameBtn.onclick = (e) => {
-      e.stopPropagation();
+    const preview = document.createElement("span");
+    preview.className = "chat-list-preview";
+    preview.textContent = getChatListPreview(chat);
+
+    const meta = document.createElement("span");
+    meta.className = "chat-list-meta";
+    meta.textContent = `${chat.messages.length} messages`;
+
+    mainButton.append(title, preview, meta);
+
+    const tools = document.createElement("div");
+    tools.className = "chat-list-tools";
+
+    const renameButton = document.createElement("button");
+    renameButton.type = "button";
+    renameButton.className = "icon-button";
+    renameButton.textContent = "Rename";
+    renameButton.setAttribute("aria-label", "Rename chat");
+    renameButton.onclick = (event) => {
+      event.stopPropagation();
       renameChat(id);
     };
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "🗑️";
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "icon-button danger";
+    deleteButton.textContent = "Delete";
+    deleteButton.setAttribute("aria-label", "Delete chat");
+    deleteButton.onclick = (event) => {
+      event.stopPropagation();
       deleteChat(id);
     };
 
-    tools.appendChild(renameBtn);
-    tools.appendChild(deleteBtn);
-
-    container.appendChild(btn);
-    container.appendChild(tools);
-    chatList.appendChild(container);
+    tools.append(renameButton, deleteButton);
+    item.append(mainButton, tools);
+    chatList.appendChild(item);
   });
 
-  const extra = document.createElement("div");
-  extra.innerHTML = `
-    <button onclick="exportChats()">📁 Export</button>
+  const actions = document.createElement("div");
+  actions.className = "chat-list-actions";
+  actions.innerHTML = `
+    <button type="button" onclick="exportChats()">Export</button>
     <input type="file" id="importInput" accept=".json" hidden />
-    <button onclick="document.getElementById('importInput').click()">📂 Import</button>
+    <button type="button" onclick="document.getElementById('importInput').click()">Import</button>
   `;
-  extra.style.marginTop = "10px";
-  chatList.appendChild(extra);
+  chatList.appendChild(actions);
 
   const importInput = document.getElementById("importInput");
   if (importInput) {
@@ -301,7 +330,7 @@ async function sendMessage() {
         parts.push(fullMessage.slice(i, i + CHUNK_SIZE));
       }
 
-      for (let i = 0; i < parts.length; i++) {
+      for (let i = 0; i < parts.length; i += 1) {
         await handleChunk(parts[i], i + 1, parts.length);
       }
     }
@@ -424,7 +453,7 @@ async function maybeSummarize() {
 function renameChat(id) {
   const chat = chats[id];
   const firstUserMessage =
-    chat.messages.find((m) => m.role === "user")?.content || "";
+    chat.messages.find((message) => message.role === "user")?.content || "";
   const suggested = (chat.title || firstUserMessage).slice(0, 40);
   const newTitle = prompt("New chat name:", suggested);
 
@@ -456,10 +485,10 @@ function exportChats() {
   const blob = new Blob([dataStr], { type: "application/json" });
   const url = URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "my_chats.json";
-  a.click();
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "my_chats.json";
+  link.click();
 
   URL.revokeObjectURL(url);
 }
@@ -469,9 +498,9 @@ function importChats(event) {
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = (loadEvent) => {
     try {
-      const imported = JSON.parse(e.target.result);
+      const imported = JSON.parse(loadEvent.target.result);
       const normalized = {};
 
       for (const id of Object.keys(imported)) {
@@ -530,9 +559,9 @@ function initApp() {
 
   if (input) {
     input.addEventListener("input", updateCharCounter);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
         sendMessage();
       }
     });

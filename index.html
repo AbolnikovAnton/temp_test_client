@@ -9,13 +9,20 @@
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <h2>Chats</h2>
-        <button id="newChatBtn">+ New</button>
+        <div class="sidebar-header">
+          <div>
+            <p class="sidebar-kicker">Workspace</p>
+            <h2>Chats</h2>
+          </div>
+          <button id="newChatBtn" class="primary-action" type="button">
+            + New
+          </button>
+        </div>
         <div id="chatList"></div>
         <div class="usage-stats" id="usageStats">
-          💰 Spent: $0.0000<br />
-          🔁 Input: 0 tokens<br />
-          📤 Output: 0 tokens
+          Spent: $0.0000<br />
+          Input: 0 tokens<br />
+          Output: 0 tokens
         </div>
       </aside>
 
@@ -36,9 +43,7 @@
             placeholder="Write a message..."
           ></textarea>
           <div class="char-counter"><span id="charCount">0</span> / 10000</div>
-          <button id="sendBtn" type="button" onclick="sendMessage()">
-            Send
-          </button>
+          <button id="sendBtn" type="button">Send</button>
         </div>
       </main>
     </div>
