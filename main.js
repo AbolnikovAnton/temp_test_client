@@ -1,4 +1,6 @@
 const serverUrl = "https://temp-test-server-anton-tonic.onrender.com/chat";
+const keepAliveUrl = new URL("/", serverUrl).href;
+const KEEP_ALIVE_INTERVAL_MS = 29 * 60 * 1000; // 29 minutes
 
 const STORAGE_KEY = "chats";
 const MAX_INPUT_CHARS = 10000;
@@ -539,6 +541,20 @@ function updateCharCounter() {
   }
 }
 
+function keepServerAlive() {
+  fetch(keepAliveUrl, {
+    method: "GET",
+    mode: "no-cors",
+  }).catch(() => {
+    // Silent failure: keep-alive is best-effort and should not disturb the app.
+  });
+}
+
+function scheduleKeepAlive() {
+  keepServerAlive();
+  setInterval(keepServerAlive, KEEP_ALIVE_INTERVAL_MS);
+}
+
 let isAppInitialized = false;
 
 function initApp() {
@@ -572,6 +588,7 @@ function initApp() {
   renderEmptyState();
   updateStatsUI();
   updateCharCounter();
+  scheduleKeepAlive();
 }
 
 if (document.readyState === "loading") {

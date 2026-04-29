@@ -41,6 +41,8 @@ The backend runs on a free hosting plan.
 
 After idle time, the service may sleep. The first request can be slower while the server wakes up.
 
+This client now sends a lightweight keep-alive ping every 29 minutes while the page is open. The first ping is sent immediately on load, which helps reduce delay before the user starts typing and sending messages.
+
 Once warmed up, responses should return at normal speed.
 
 ## Project Files
