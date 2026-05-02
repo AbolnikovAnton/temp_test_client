@@ -344,7 +344,7 @@ textarea::placeholder {
 
 .chat-list-item {
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 10px;
   transition:    background 0.2s ease,    border-color 0.2s ease,    box-shadow 0.2s ease,    transform 0.2s ease;
   padding: 8px;
@@ -422,8 +422,9 @@ textarea::placeholder {
 
 .chat-list-tools {
   display: inline-flex;
+  flex-direction: column;
   flex-shrink: 0;
-  align-items: center;
+  align-items: stretch;
   gap: 6px;
   opacity: 0.72;
   transition: opacity 0.2s ease;
@@ -435,9 +436,10 @@ textarea::placeholder {
 }
 
 .icon-button {
-  min-width: 60px;
-  height: 34px;
-  padding: 0 10px;
+  min-width: 72px;
+  width: 72px;
+  height: auto;
+  padding: 10px 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
