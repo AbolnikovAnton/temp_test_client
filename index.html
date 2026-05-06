@@ -9,25 +9,30 @@
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <div class="sidebar-header">
-          <div>
-            <p class="sidebar-kicker">Workspace</p>
-            <h2>Chats</h2>
+        <div class="sidebar-content">
+          <div class="sidebar-header">
+            <div>
+              <p class="sidebar-kicker">Workspace</p>
+              <h2>Chats</h2>
+            </div>
+            <button id="newChatBtn" class="primary-action" type="button">
+              + New
+            </button>
           </div>
-          <button id="newChatBtn" class="primary-action" type="button">
-            + New
-          </button>
-        </div>
-        <div id="chatList"></div>
-        <div class="usage-stats" id="usageStats">
-          Spent: $0.0000<br />
-          Input: 0 tokens<br />
-          Output: 0 tokens
+          <div id="chatList"></div>
+          <div class="usage-stats" id="usageStats">
+            Spent: $0.0000<br />
+            Input: 0 tokens<br />
+            Output: 0 tokens
+          </div>
         </div>
       </aside>
 
       <main class="chat-container">
         <header>
+          <button id="burgerBtn" class="burger-btn" type="button" aria-label="Open menu">
+            ☰
+          </button>
           <h1>Anton Abolnikov CoPilot</h1>
         </header>
 

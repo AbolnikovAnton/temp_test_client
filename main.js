@@ -557,6 +557,20 @@ function scheduleKeepAlive() {
 
 let isAppInitialized = false;
 
+function toggleSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) {
+    sidebar.classList.toggle("mobile-open");
+  }
+}
+
+function closeSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) {
+    sidebar.classList.remove("mobile-open");
+  }
+}
+
 function initApp() {
   if (isAppInitialized) return;
   isAppInitialized = true;
@@ -564,6 +578,7 @@ function initApp() {
   const input = document.getElementById("userInput");
   const newChatBtn = document.getElementById("newChatBtn");
   const sendBtn = document.getElementById("sendBtn");
+  const burgerBtn = document.getElementById("burgerBtn");
 
   if (newChatBtn) {
     newChatBtn.onclick = createNewChat;
@@ -571,6 +586,19 @@ function initApp() {
 
   if (sendBtn) {
     sendBtn.onclick = sendMessage;
+  }
+
+  if (burgerBtn) {
+    burgerBtn.onclick = toggleSidebar;
+  }
+
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) {
+    sidebar.addEventListener("click", (event) => {
+      if (event.target === sidebar) {
+        closeSidebar();
+      }
+    });
   }
 
   if (input) {
