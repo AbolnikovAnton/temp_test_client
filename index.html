@@ -62,7 +62,10 @@
 
         <div id="chatBox" class="chat-box"></div>
         <div id="typing" class="typing-indicator hidden" role="status">
-          Assistant is typing...
+          <span class="sr-only">Assistant is typing...</span>
+          <span class="typing-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
         </div>
         <div id="liveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
