@@ -3,6 +3,7 @@ const keepAliveUrl = new URL("/", serverUrl).href;
 const KEEP_ALIVE_INTERVAL_MS = 29 * 60 * 1000; // 29 minutes
 
 const STORAGE_KEY = "chats";
+const THEME_STORAGE_KEY = "theme";
 const MAX_INPUT_CHARS = 10000;
 const CHUNK_SIZE = 8000;
 const SUMMARY_TRIGGER_MESSAGES = 12;
@@ -675,6 +676,35 @@ function scheduleKeepAlive() {
 
 let isAppInitialized = false;
 
+function getTheme() {
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+}
+
+function updateThemeToggleButton() {
+  const btn = document.getElementById("themeToggle");
+  if (!btn) return;
+
+  const theme = getTheme();
+  btn.textContent = theme === "light" ? "🌙" : "☀️";
+  btn.setAttribute(
+    "aria-label",
+    theme === "light" ? "Switch to dark theme" : "Switch to light theme",
+  );
+}
+
+function toggleTheme() {
+  const next = getTheme() === "light" ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  } catch (err) {
+    // Best-effort only — a failed save just means the choice won't persist.
+  }
+
+  updateThemeToggleButton();
+}
+
 function toggleSidebar() {
   const sidebar = document.querySelector(".sidebar");
   if (sidebar) {
@@ -697,6 +727,7 @@ function initApp() {
   const newChatBtn = document.getElementById("newChatBtn");
   const sendBtn = document.getElementById("sendBtn");
   const burgerBtn = document.getElementById("burgerBtn");
+  const themeToggleBtn = document.getElementById("themeToggle");
 
   if (newChatBtn) {
     newChatBtn.onclick = createNewChat;
@@ -709,6 +740,11 @@ function initApp() {
   if (burgerBtn) {
     burgerBtn.onclick = toggleSidebar;
   }
+
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = toggleTheme;
+  }
+  updateThemeToggleButton();
 
   const sidebar = document.querySelector(".sidebar");
   if (sidebar) {
