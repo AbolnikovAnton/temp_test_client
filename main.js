@@ -281,6 +281,71 @@ function toggleTyping(show) {
   typing.classList.toggle("hidden", !show);
 }
 
+function renderStreamingBubble(text) {
+  const chatBox = document.getElementById("chatBox");
+  if (!chatBox) return;
+
+  let bubble = document.getElementById("streamingMsg");
+  if (!bubble) {
+    bubble = document.createElement("div");
+    bubble.id = "streamingMsg";
+    bubble.className = "msg assistant";
+    chatBox.appendChild(bubble);
+  }
+
+  const rawHtml = marked.parse(text || "", { breaks: true, gfm: true });
+  bubble.innerHTML = window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function clearStreamingBubble() {
+  document.getElementById("streamingMsg")?.remove();
+}
+
+// Reads the SSE body of a streaming /chat response, calling onDelta with the
+// accumulated text as it grows. Resolves with the full text plus whatever
+// "done"/"error" event the server sent last (or null if the stream just
+// ended without one, e.g. a dropped connection).
+async function consumeChatStream(res, onDelta) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+  let final = null;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let sepIndex;
+    while ((sepIndex = buffer.indexOf("\n\n")) !== -1) {
+      const rawEvent = buffer.slice(0, sepIndex).trim();
+      buffer = buffer.slice(sepIndex + 2);
+
+      if (!rawEvent.startsWith("data:")) continue;
+      const payload = rawEvent.slice(5).trim();
+      if (!payload) continue;
+
+      let json;
+      try {
+        json = JSON.parse(payload);
+      } catch {
+        continue;
+      }
+
+      if (json.type === "chunk") {
+        text += json.text;
+        onDelta?.(text);
+      } else if (json.type === "done" || json.type === "error") {
+        final = json;
+      }
+    }
+  }
+
+  return { text, final };
+}
+
 function setSendingState(sending) {
   isSending = sending;
 
@@ -374,31 +439,44 @@ async function handleChunk(text, partNum, totalParts) {
     const res = await fetch(serverUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, stream: true }),
     });
 
     if (!res.ok) {
       throw new Error(`Server error: ${res.status} ${res.statusText}`);
     }
 
-    const data = await res.json();
-    const reply = data.reply || "Empty response";
+    const { text: reply, final } = await consumeChatStream(res, (partial) => {
+      toggleTyping(false);
+      renderStreamingBubble(partial);
+    });
+    clearStreamingBubble();
 
-    addMessage("assistant", reply);
+    if (final?.type === "error" && !reply) {
+      // Nothing ever reached the screen — treat like any other failed request.
+      throw new Error(final.error || "Streaming failed");
+    }
+
+    const finalReply =
+      final?.type === "error"
+        ? `${reply}\n\n*(interrupted: ${final.error})*`
+        : reply || "Empty response";
+
+    addMessage("assistant", finalReply);
     renderMessages();
 
     // Prefer the real token counts and price the server computed for the
     // model that actually answered (Gemini vs OpenRouter have very
     // different pricing) — fall back to a rough estimate only if the
-    // server didn't return usage for some reason.
-    const inputTokens = data.usage?.inputTokens ?? estimateTokens(text);
-    const outputTokens = data.usage?.outputTokens ?? estimateTokens(reply);
+    // server didn't return usage (e.g. the stream was interrupted).
+    const inputTokens = final?.usage?.inputTokens ?? estimateTokens(text);
+    const outputTokens = final?.usage?.outputTokens ?? estimateTokens(finalReply);
 
     tokenStats.input += inputTokens;
     tokenStats.output += outputTokens;
 
-    if (typeof data.cost === "number") {
-      tokenStats.cost += data.cost;
+    if (typeof final?.cost === "number") {
+      tokenStats.cost += final.cost;
     } else {
       tokenStats.costIsPartial = true;
     }
@@ -407,6 +485,7 @@ async function handleChunk(text, partNum, totalParts) {
     await maybeSummarize();
   } catch (err) {
     console.error(err);
+    clearStreamingBubble();
 
     let errorText = "Request failed";
     if (err.message?.includes("Failed to fetch")) {
