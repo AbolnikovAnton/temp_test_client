@@ -530,6 +530,13 @@ header h1 {
   border-color: var(--color-error-border);
 }
 
+.msg-model-badge {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
 .empty-state {
   color: var(--color-text-faint);
   text-align: center;

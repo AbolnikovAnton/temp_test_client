@@ -104,9 +104,9 @@ function createNewChat() {
   return id;
 }
 
-function addMessage(role, content, { isError = false } = {}) {
+function addMessage(role, content, { isError = false, provider = null, model = null } = {}) {
   const chat = getCurrentChat();
-  chat.messages.push({ role, content, isError });
+  chat.messages.push({ role, content, isError, provider, model });
   saveChats();
   renderChatList();
 
@@ -237,6 +237,13 @@ function renderMessages() {
 
       div.innerHTML = window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
       addCodeCopyButtons(div);
+
+      if (!msg.isError && (msg.provider || msg.model)) {
+        const badge = document.createElement("div");
+        badge.className = "msg-model-badge";
+        badge.textContent = `via ${msg.model || msg.provider}`;
+        div.appendChild(badge);
+      }
     } else {
       div.textContent = msg.content;
     }
@@ -576,7 +583,11 @@ async function handleChunk(text, partNum, totalParts) {
         ? `${reply}\n\n*(interrupted: ${final.error})*`
         : reply || "Empty response";
 
-    addMessage("assistant", finalReply, { isError: final?.type === "error" });
+    addMessage("assistant", finalReply, {
+      isError: final?.type === "error",
+      provider: final?.provider ?? null,
+      model: final?.model ?? null,
+    });
     renderMessages();
 
     // Prefer the real token counts and price the server computed for the
