@@ -372,6 +372,12 @@ function renderStreamingBubble(text) {
   const rawHtml = marked.parse(text || "", { breaks: true, gfm: true });
   bubble.innerHTML = window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
   addCodeCopyButtons(bubble);
+
+  const cursor = document.createElement("span");
+  cursor.className = "streaming-cursor";
+  cursor.setAttribute("aria-hidden", "true");
+  bubble.appendChild(cursor);
+
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
