@@ -43,6 +43,8 @@
 
   --color-warning: #ffcc00;
   --color-danger: #ff5555;
+  --color-error-bg: #3a1e22;
+  --color-error-border: #7a3540;
 
   --color-chatitem-border: #273043;
   --color-chatitem-bg: rgba(20, 25, 35, 0.86);
@@ -126,6 +128,8 @@
 
   --color-warning: #a06a00;
   --color-danger: #c72a44;
+  --color-error-bg: #fdeaec;
+  --color-error-border: #f0b8c0;
 
   --color-chatitem-border: #dde3ee;
   --color-chatitem-bg: rgba(255, 255, 255, 0.9);
@@ -519,6 +523,11 @@ header h1 {
   color: var(--color-assistant-text);
   background: var(--color-assistant-bg);
   border-color: var(--color-assistant-border);
+}
+
+.msg.error {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
 }
 
 .empty-state {

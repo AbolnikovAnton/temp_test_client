@@ -104,9 +104,9 @@ function createNewChat() {
   return id;
 }
 
-function addMessage(role, content) {
+function addMessage(role, content, { isError = false } = {}) {
   const chat = getCurrentChat();
-  chat.messages.push({ role, content });
+  chat.messages.push({ role, content, isError });
   saveChats();
   renderChatList();
 
@@ -191,9 +191,13 @@ function addCodeCopyButtons(container) {
   });
 }
 
-function buildMessageRow(role, bubbleEl) {
+function buildMessageRow(role, bubbleEl, isError = false) {
   const row = document.createElement("div");
   row.className = `msg-row ${role}`;
+
+  if (isError) {
+    bubbleEl.classList.add("error");
+  }
 
   const avatar = document.createElement("div");
   avatar.className = `msg-avatar ${role}`;
@@ -237,7 +241,7 @@ function renderMessages() {
       div.textContent = msg.content;
     }
 
-    chatBox.appendChild(buildMessageRow(msg.role, div));
+    chatBox.appendChild(buildMessageRow(msg.role, div, msg.isError));
   });
 
   // renderMessages() rebuilds the whole list every time, so only animate the
@@ -572,7 +576,7 @@ async function handleChunk(text, partNum, totalParts) {
         ? `${reply}\n\n*(interrupted: ${final.error})*`
         : reply || "Empty response";
 
-    addMessage("assistant", finalReply);
+    addMessage("assistant", finalReply, { isError: final?.type === "error" });
     renderMessages();
 
     // Prefer the real token counts and price the server computed for the
@@ -604,7 +608,7 @@ async function handleChunk(text, partNum, totalParts) {
       errorText = err.message;
     }
 
-    addMessage("assistant", `Error: ${errorText}`);
+    addMessage("assistant", `Error: ${errorText}`, { isError: true });
     renderMessages();
   }
 }
