@@ -72,7 +72,7 @@ body {
 }
 
 .sidebar button {
-  background: #0077cc00;
+  background: transparent;
   color: white;
   border: none;
   padding: 10px;
@@ -263,7 +263,7 @@ textarea::placeholder {
 }
 
 .input-container button {
-  background: #0077cc00;
+  background: transparent;
   color: white;
   padding: 0 24px;
   font-size: 16px;
@@ -354,16 +354,18 @@ textarea::placeholder {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  transition:    background 0.2s ease,    border-color 0.2s ease,    box-shadow 0.2s ease,    transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   padding: 8px;
   border-radius: 16px;
   border: 1px solid #273043;
   background: rgba(20, 25, 35, 0.86);
-  box-shadow:    0 10px 24px rgba(0, 0, 0, 0.14),    inset 0 1px 0 rgba(255, 255, 255, 0.02);
-  -webkit-transition:;
-  -moz-transition:;
-  -ms-transition:;
-  -o-transition:;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .chat-list-item:hover {
