@@ -349,19 +349,27 @@ async function sendMessage() {
 
 async function handleChunk(text, partNum, totalParts) {
   const isLast = partNum === totalParts;
-  const prefix = totalParts > 1 ? `Part ${partNum}/${totalParts}:\n` : "";
-  const suffix =
-    isLast && totalParts > 1
-      ? "\nFinal part. Please process the whole text as a single message."
-      : "";
 
-  const chunkMessage = prefix + text + suffix;
-
-  addMessage("user", chunkMessage);
+  // The raw text is what gets stored in history. The "Part N/M" wrapper is
+  // only needed so the model understands multi-part input for *this* request
+  // — storing it permanently would re-send that noise as context forever.
+  addMessage("user", text);
   renderMessages();
 
   try {
     const messages = buildMessagesForAPI();
+
+    if (totalParts > 1) {
+      const prefix = `Part ${partNum}/${totalParts}:\n`;
+      const suffix = isLast
+        ? "\nFinal part. Please process the whole text as a single message."
+        : "";
+      const last = messages[messages.length - 1];
+      messages[messages.length - 1] = {
+        ...last,
+        content: prefix + last.content + suffix,
+      };
+    }
 
     const res = await fetch(serverUrl, {
       method: "POST",
@@ -383,7 +391,7 @@ async function handleChunk(text, partNum, totalParts) {
     // model that actually answered (Gemini vs OpenRouter have very
     // different pricing) — fall back to a rough estimate only if the
     // server didn't return usage for some reason.
-    const inputTokens = data.usage?.inputTokens ?? estimateTokens(chunkMessage);
+    const inputTokens = data.usage?.inputTokens ?? estimateTokens(text);
     const outputTokens = data.usage?.outputTokens ?? estimateTokens(reply);
 
     tokenStats.input += inputTokens;
