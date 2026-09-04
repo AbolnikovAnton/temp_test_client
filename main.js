@@ -104,9 +104,13 @@ function createNewChat() {
   return id;
 }
 
-function addMessage(role, content, { isError = false, provider = null, model = null } = {}) {
+function addMessage(
+  role,
+  content,
+  { isError = false, provider = null, model = null, timestamp = Date.now() } = {},
+) {
   const chat = getCurrentChat();
-  chat.messages.push({ role, content, isError, provider, model });
+  chat.messages.push({ role, content, isError, provider, model, timestamp });
   saveChats();
   renderChatList();
 
@@ -191,6 +195,14 @@ function addCodeCopyButtons(container) {
   });
 }
 
+function formatMessageTime(timestamp) {
+  if (!timestamp) return "";
+  return new Date(timestamp).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function buildMessageRow(role, bubbleEl, isError = false) {
   const row = document.createElement("div");
   row.className = `msg-row ${role}`;
@@ -238,14 +250,22 @@ function renderMessages() {
       div.innerHTML = window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
       addCodeCopyButtons(div);
 
-      if (!msg.isError && (msg.provider || msg.model)) {
-        const badge = document.createElement("div");
-        badge.className = "msg-model-badge";
-        badge.textContent = `via ${msg.model || msg.provider}`;
-        div.appendChild(badge);
-      }
     } else {
       div.textContent = msg.content;
+    }
+
+    const footerParts = [];
+    if (msg.role === "assistant" && !msg.isError && (msg.provider || msg.model)) {
+      footerParts.push(`via ${msg.model || msg.provider}`);
+    }
+    const time = formatMessageTime(msg.timestamp);
+    if (time) footerParts.push(time);
+
+    if (footerParts.length) {
+      const footer = document.createElement("div");
+      footer.className = "msg-footer";
+      footer.textContent = footerParts.join(" · ");
+      div.appendChild(footer);
     }
 
     chatBox.appendChild(buildMessageRow(msg.role, div, msg.isError));

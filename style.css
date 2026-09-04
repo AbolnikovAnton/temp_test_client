@@ -530,7 +530,7 @@ header h1 {
   border-color: var(--color-error-border);
 }
 
-.msg-model-badge {
+.msg-footer {
   margin-top: 8px;
   font-size: 11px;
   color: var(--color-text-muted);
