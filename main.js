@@ -160,6 +160,37 @@ function renderEmptyState() {
   }
 }
 
+function addCodeCopyButtons(container) {
+  container.querySelectorAll("pre").forEach((pre) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "code-copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code to clipboard");
+
+    btn.onclick = () => {
+      const code = pre.querySelector("code")?.textContent ?? pre.textContent;
+
+      navigator.clipboard
+        ?.writeText(code)
+        .then(() => {
+          btn.textContent = "Copied!";
+          setTimeout(() => {
+            btn.textContent = "Copy";
+          }, 1500);
+        })
+        .catch(() => {
+          btn.textContent = "Failed";
+          setTimeout(() => {
+            btn.textContent = "Copy";
+          }, 1500);
+        });
+    };
+
+    pre.appendChild(btn);
+  });
+}
+
 function buildMessageRow(role, bubbleEl) {
   const row = document.createElement("div");
   row.className = `msg-row ${role}`;
@@ -201,6 +232,7 @@ function renderMessages() {
       });
 
       div.innerHTML = window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
+      addCodeCopyButtons(div);
     } else {
       div.textContent = msg.content;
     }
@@ -333,6 +365,7 @@ function renderStreamingBubble(text) {
 
   const rawHtml = marked.parse(text || "", { breaks: true, gfm: true });
   bubble.innerHTML = window.DOMPurify ? DOMPurify.sanitize(rawHtml) : rawHtml;
+  addCodeCopyButtons(bubble);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
