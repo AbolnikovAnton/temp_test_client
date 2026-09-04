@@ -60,7 +60,17 @@
           </button>
         </header>
 
-        <div id="chatBox" class="chat-box"></div>
+        <div class="chat-box-wrapper">
+          <div id="chatBox" class="chat-box"></div>
+          <button
+            id="scrollToBottomBtn"
+            class="scroll-to-bottom hidden"
+            type="button"
+            aria-label="Scroll to latest message"
+          >
+            ↓ New messages
+          </button>
+        </div>
         <div id="typing" class="typing-indicator hidden" role="status">
           <span class="sr-only">Assistant is typing...</span>
           <span class="typing-dots" aria-hidden="true">

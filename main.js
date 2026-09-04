@@ -244,7 +244,7 @@ function renderMessages() {
   // newest row in — otherwise every render would replay the whole history.
   chatBox.lastElementChild?.classList.add("msg-row-enter");
 
-  chatBox.scrollTop = chatBox.scrollHeight;
+  scrollChatToBottom();
 }
 
 function getChatListTitle(chat) {
@@ -355,9 +355,33 @@ function toggleTyping(show) {
   typing.classList.toggle("hidden", !show);
 }
 
+function isChatBoxNearBottom(threshold = 80) {
+  const chatBox = document.getElementById("chatBox");
+  if (!chatBox) return true;
+  return chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < threshold;
+}
+
+function updateScrollToBottomVisibility() {
+  const btn = document.getElementById("scrollToBottomBtn");
+  if (!btn) return;
+  btn.classList.toggle("hidden", isChatBoxNearBottom());
+}
+
+function scrollChatToBottom() {
+  const chatBox = document.getElementById("chatBox");
+  if (!chatBox) return;
+  chatBox.scrollTop = chatBox.scrollHeight;
+  updateScrollToBottomVisibility();
+}
+
 function renderStreamingBubble(text) {
   const chatBox = document.getElementById("chatBox");
   if (!chatBox) return;
+
+  // Checked before any DOM growth below — sticks to the bottom only if the
+  // user was already there, instead of yanking them back down every token
+  // if they scrolled up to read earlier messages mid-stream.
+  const wasNearBottom = isChatBoxNearBottom();
 
   let bubble = document.getElementById("streamingMsg");
   if (!bubble) {
@@ -378,7 +402,10 @@ function renderStreamingBubble(text) {
   cursor.setAttribute("aria-hidden", "true");
   bubble.appendChild(cursor);
 
-  chatBox.scrollTop = chatBox.scrollHeight;
+  if (wasNearBottom) {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+  updateScrollToBottomVisibility();
 }
 
 function clearStreamingBubble() {
@@ -808,6 +835,15 @@ function initApp() {
     themeToggleBtn.onclick = toggleTheme;
   }
   updateThemeToggleButton();
+
+  const chatBoxEl = document.getElementById("chatBox");
+  const scrollToBottomBtn = document.getElementById("scrollToBottomBtn");
+  if (chatBoxEl) {
+    chatBoxEl.addEventListener("scroll", updateScrollToBottomVisibility);
+  }
+  if (scrollToBottomBtn) {
+    scrollToBottomBtn.onclick = scrollChatToBottom;
+  }
 
   const sidebar = document.querySelector(".sidebar");
   if (sidebar) {
