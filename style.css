@@ -727,9 +727,45 @@ textarea::placeholder {
   color: var(--color-md-heading);
 }
 
-.msg ul {
+.msg ul,
+.msg ol {
   padding-left: 20px;
   margin-bottom: 12px;
+}
+
+.msg blockquote {
+  margin: 0 0 12px;
+  padding: 4px 12px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.msg table {
+  display: block;
+  overflow-x: auto;
+  width: max-content;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.msg th,
+.msg td {
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.msg th {
+  background: var(--color-surface-alt);
+  font-weight: 700;
+}
+
+.msg hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 12px 0;
 }
 
 .msg a {
