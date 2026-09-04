@@ -8,6 +8,7 @@ const MAX_INPUT_CHARS = 10000;
 const CHUNK_SIZE = 8000;
 const SUMMARY_TRIGGER_MESSAGES = 12;
 const SUMMARY_TAIL_MESSAGES = 10;
+const MAX_SUMMARY_CHARS = 4000;
 
 let chats = loadChats();
 let isSending = false;
@@ -653,14 +654,21 @@ async function maybeSummarize() {
 
   if (unsummarizedCount < SUMMARY_TRIGGER_MESSAGES) return;
 
-  const sliceStart = Math.max(0, totalMessages - 20);
-  const recentMessages = chat.messages.slice(sliceStart);
+  // Always cover everything since the last successful summary — not a fixed
+  // lookback window. A fixed window (e.g. "last 20 messages") silently drops
+  // anything older than that the moment a summarization attempt fails and
+  // more than a handful of messages pass before the next one succeeds: those
+  // messages end up outside both the window AND the (stale) existing
+  // summary, gone from context for good even though they're still visible
+  // in the UI. Catching up on the full backlog here means a failed attempt
+  // just delays the update instead of losing anything.
+  const recentMessages = chat.messages.slice(chat.lastSummarizedCount || 0);
 
   const summaryPrompt = [
     {
       role: "system",
       content:
-        "Create a concise rolling summary of this conversation. Capture key context, goals, decisions, problems, and solutions. Do not invent anything. Keep it compact and useful for continuing the chat later.",
+        "Create a concise rolling summary of this conversation, under 300 words. Capture key context, goals, decisions, problems, and solutions. Do not invent anything. Keep it compact and useful for continuing the chat later.",
     },
   ];
 
@@ -687,11 +695,17 @@ async function maybeSummarize() {
     const data = await res.json();
 
     if (data.reply) {
-      chat.summary = data.reply;
+      // Hard cap regardless of what the model actually returned — keeps the
+      // summary (and thus every future request's context) bounded even if
+      // it ignores the "under 300 words" instruction.
+      chat.summary = data.reply.slice(0, MAX_SUMMARY_CHARS);
       chat.lastSummarizedCount = totalMessages;
       saveChats();
     }
   } catch (err) {
+    // lastSummarizedCount is untouched, so the next successful call (after
+    // a later turn re-triggers this) picks up the full backlog from here —
+    // see the recentMessages comment above.
     console.warn("Failed to summarize chat history:", err);
   }
 }
