@@ -160,6 +160,24 @@ function renderEmptyState() {
   }
 }
 
+function buildMessageRow(role, bubbleEl) {
+  const row = document.createElement("div");
+  row.className = `msg-row ${role}`;
+
+  const avatar = document.createElement("div");
+  avatar.className = `msg-avatar ${role}`;
+  avatar.setAttribute("aria-hidden", "true");
+  avatar.textContent = role === "assistant" ? "AI" : "Y";
+
+  if (role === "assistant") {
+    row.append(avatar, bubbleEl);
+  } else {
+    row.append(bubbleEl, avatar);
+  }
+
+  return row;
+}
+
 function renderMessages() {
   const chatBox = document.getElementById("chatBox");
   const chat = getCurrentChat();
@@ -187,7 +205,7 @@ function renderMessages() {
       div.textContent = msg.content;
     }
 
-    chatBox.appendChild(div);
+    chatBox.appendChild(buildMessageRow(msg.role, div));
   });
 
   chatBox.scrollTop = chatBox.scrollHeight;
@@ -310,7 +328,7 @@ function renderStreamingBubble(text) {
     bubble = document.createElement("div");
     bubble.id = "streamingMsg";
     bubble.className = "msg assistant";
-    chatBox.appendChild(bubble);
+    chatBox.appendChild(buildMessageRow("assistant", bubble));
   }
 
   const rawHtml = marked.parse(text || "", { breaks: true, gfm: true });
@@ -319,7 +337,7 @@ function renderStreamingBubble(text) {
 }
 
 function clearStreamingBubble() {
-  document.getElementById("streamingMsg")?.remove();
+  document.getElementById("streamingMsg")?.closest(".msg-row")?.remove();
 }
 
 // Reads the SSE body of a streaming /chat response, calling onDelta with the
