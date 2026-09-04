@@ -108,6 +108,25 @@ function addMessage(role, content) {
   chat.messages.push({ role, content });
   saveChats();
   renderChatList();
+
+  if (role === "assistant") {
+    announceToScreenReader(content);
+  }
+}
+
+function stripMarkdownForAnnouncement(text) {
+  return text
+    .replace(/```[\s\S]*?```/g, " code block ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/[*_#>~]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function announceToScreenReader(text) {
+  const liveRegion = document.getElementById("liveRegion");
+  if (!liveRegion) return;
+  liveRegion.textContent = stripMarkdownForAnnouncement(text).slice(0, 500);
 }
 
 function estimateTokens(text) {

@@ -37,9 +37,10 @@
         </header>
 
         <div id="chatBox" class="chat-box"></div>
-        <div id="typing" class="typing-indicator hidden">
+        <div id="typing" class="typing-indicator hidden" role="status">
           Assistant is typing...
         </div>
+        <div id="liveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
         <div class="input-container">
           <textarea
