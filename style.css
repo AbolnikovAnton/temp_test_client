@@ -385,6 +385,28 @@ header h1 {
   margin-bottom: 12px;
 }
 
+.msg-row-enter {
+  animation: msg-appear 0.25s ease-out;
+}
+
+@keyframes msg-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg-row-enter {
+    animation: none;
+  }
+}
+
 .msg-row.user {
   justify-content: flex-end;
 }

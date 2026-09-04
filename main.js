@@ -240,6 +240,10 @@ function renderMessages() {
     chatBox.appendChild(buildMessageRow(msg.role, div));
   });
 
+  // renderMessages() rebuilds the whole list every time, so only animate the
+  // newest row in — otherwise every render would replay the whole history.
+  chatBox.lastElementChild?.classList.add("msg-row-enter");
+
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
@@ -360,7 +364,9 @@ function renderStreamingBubble(text) {
     bubble = document.createElement("div");
     bubble.id = "streamingMsg";
     bubble.className = "msg assistant";
-    chatBox.appendChild(buildMessageRow("assistant", bubble));
+    const row = buildMessageRow("assistant", bubble);
+    row.classList.add("msg-row-enter");
+    chatBox.appendChild(row);
   }
 
   const rawHtml = marked.parse(text || "", { breaks: true, gfm: true });
