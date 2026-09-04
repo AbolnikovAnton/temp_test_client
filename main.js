@@ -17,6 +17,7 @@ const tokenStats = {
   input: 0,
   output: 0,
   cost: 0,
+  costIsPartial: false, // true once we hit a reply with no known price for its model
 };
 
 function createEmptyChat() {
@@ -118,8 +119,12 @@ function updateStatsUI() {
   const stats = document.getElementById("usageStats");
   if (!stats) return;
 
+  const spentLine = tokenStats.costIsPartial
+    ? `Spent: $${tokenStats.cost.toFixed(4)}+ (some replies had no known price)`
+    : `Spent: $${tokenStats.cost.toFixed(4)}`;
+
   stats.innerHTML = `
-    Spent: $${tokenStats.cost.toFixed(4)}<br/>
+    ${spentLine}<br/>
     Input: ${tokenStats.input} tokens<br/>
     Output: ${tokenStats.output} tokens
   `;
@@ -374,14 +379,21 @@ async function handleChunk(text, partNum, totalParts) {
     addMessage("assistant", reply);
     renderMessages();
 
-    const inputTokens = estimateTokens(chunkMessage);
-    const outputTokens = estimateTokens(reply);
-    const totalCost =
-      (inputTokens / 1000) * 0.005 + (outputTokens / 1000) * 0.015;
+    // Prefer the real token counts and price the server computed for the
+    // model that actually answered (Gemini vs OpenRouter have very
+    // different pricing) — fall back to a rough estimate only if the
+    // server didn't return usage for some reason.
+    const inputTokens = data.usage?.inputTokens ?? estimateTokens(chunkMessage);
+    const outputTokens = data.usage?.outputTokens ?? estimateTokens(reply);
 
     tokenStats.input += inputTokens;
     tokenStats.output += outputTokens;
-    tokenStats.cost += totalCost;
+
+    if (typeof data.cost === "number") {
+      tokenStats.cost += data.cost;
+    } else {
+      tokenStats.costIsPartial = true;
+    }
 
     updateStatsUI();
     await maybeSummarize();
