@@ -136,6 +136,10 @@ header h1 {
   font-size: 26px;
 }
 
+.burger-btn {
+  display: none;
+}
+
 .chat-box {
   flex: 1;
   min-height: 0;
@@ -563,6 +567,9 @@ textarea::placeholder {
   }
 
   .burger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     color: #f5f5f5;
