@@ -108,10 +108,16 @@ function createNewChat() {
 function addMessage(
   role,
   content,
-  { isError = false, provider = null, model = null, timestamp = Date.now() } = {},
+  {
+    isError = false,
+    provider = null,
+    model = null,
+    timestamp = Date.now(),
+    truncated = false,
+  } = {},
 ) {
   const chat = getCurrentChat();
-  chat.messages.push({ role, content, isError, provider, model, timestamp });
+  chat.messages.push({ role, content, isError, provider, model, timestamp, truncated });
   saveChats();
   renderChatList();
 
@@ -267,6 +273,13 @@ function renderMessages() {
       footer.className = "msg-footer";
       footer.textContent = footerParts.join(" · ");
       div.appendChild(footer);
+    }
+
+    if (msg.truncated) {
+      const truncatedNote = document.createElement("div");
+      truncatedNote.className = "msg-truncated-note";
+      truncatedNote.textContent = "⚠ Reply cut off — hit the response length limit";
+      div.appendChild(truncatedNote);
     }
 
     chatBox.appendChild(buildMessageRow(msg.role, div, msg.isError));
@@ -608,6 +621,7 @@ async function handleChunk(text, partNum, totalParts) {
       isError: final?.type === "error",
       provider: final?.provider ?? null,
       model: final?.model ?? null,
+      truncated: Boolean(final?.truncated),
     });
     renderMessages();
 
