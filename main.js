@@ -9,6 +9,7 @@ const CHUNK_SIZE = 8000;
 const SUMMARY_TRIGGER_MESSAGES = 12;
 const SUMMARY_TAIL_MESSAGES = 10;
 const MAX_SUMMARY_CHARS = 4000;
+const MAX_AUTO_CONTINUES = 3;
 
 let chats = loadChats();
 let isSending = false;
@@ -567,30 +568,15 @@ async function sendMessage() {
   }
 }
 
-async function handleChunk(text, partNum, totalParts) {
-  const isLast = partNum === totalParts;
-
-  // The raw text is what gets stored in history. The "Part N/M" wrapper is
-  // only needed so the model understands multi-part input for *this* request
-  // — storing it permanently would re-send that noise as context forever.
-  addMessage("user", text);
-  renderMessages();
+// Sends `messages` as-is, streams the reply into a new assistant bubble,
+// and reports whether it got cut off by the token limit so the caller can
+// decide whether to chain a continuation. `inputTextForEstimate` is only
+// used as a fallback token-count guess if the server didn't return real
+// usage — pass "" for a synthetic continuation turn with no new user text.
+async function requestAssistantReply(messages, inputTextForEstimate) {
+  toggleTyping(true);
 
   try {
-    const messages = buildMessagesForAPI();
-
-    if (totalParts > 1) {
-      const prefix = `Part ${partNum}/${totalParts}:\n`;
-      const suffix = isLast
-        ? "\nFinal part. Please process the whole text as a single message."
-        : "";
-      const last = messages[messages.length - 1];
-      messages[messages.length - 1] = {
-        ...last,
-        content: prefix + last.content + suffix,
-      };
-    }
-
     const res = await fetch(serverUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -629,7 +615,7 @@ async function handleChunk(text, partNum, totalParts) {
     // model that actually answered (Gemini vs OpenRouter have very
     // different pricing) — fall back to a rough estimate only if the
     // server didn't return usage (e.g. the stream was interrupted).
-    const inputTokens = final?.usage?.inputTokens ?? estimateTokens(text);
+    const inputTokens = final?.usage?.inputTokens ?? estimateTokens(inputTextForEstimate);
     const outputTokens = final?.usage?.outputTokens ?? estimateTokens(finalReply);
 
     tokenStats.input += inputTokens;
@@ -642,7 +628,8 @@ async function handleChunk(text, partNum, totalParts) {
     }
 
     updateStatsUI();
-    await maybeSummarize();
+
+    return { truncated: Boolean(final?.truncated) && final?.type !== "error" };
   } catch (err) {
     console.error(err);
     clearStreamingBubble();
@@ -656,7 +643,65 @@ async function handleChunk(text, partNum, totalParts) {
 
     addMessage("assistant", `Error: ${errorText}`, { isError: true });
     renderMessages();
+
+    return { truncated: false };
+  } finally {
+    toggleTyping(false);
   }
+}
+
+// Runs automatically right after a reply comes back truncated, so the user
+// never has to notice a cut-off sentence and ask for the rest. Each
+// continuation lands as its own assistant bubble; capped at
+// MAX_AUTO_CONTINUES so a model that keeps hitting the limit (or somehow
+// keeps reporting truncated) can't chain forever.
+async function continueTruncatedReply(depth = 0) {
+  if (depth >= MAX_AUTO_CONTINUES) return;
+
+  const messages = buildMessagesForAPI();
+  messages.push({
+    role: "user",
+    content:
+      "Continue your previous answer exactly where it left off. Do not repeat anything you already said, and do not add any preamble.",
+  });
+
+  const { truncated } = await requestAssistantReply(messages, "");
+
+  if (truncated) {
+    await continueTruncatedReply(depth + 1);
+  }
+}
+
+async function handleChunk(text, partNum, totalParts) {
+  const isLast = partNum === totalParts;
+
+  // The raw text is what gets stored in history. The "Part N/M" wrapper is
+  // only needed so the model understands multi-part input for *this* request
+  // — storing it permanently would re-send that noise as context forever.
+  addMessage("user", text);
+  renderMessages();
+
+  const messages = buildMessagesForAPI();
+
+  if (totalParts > 1) {
+    const prefix = `Part ${partNum}/${totalParts}:\n`;
+    const suffix = isLast
+      ? "\nFinal part. Please process the whole text as a single message."
+      : "";
+    const last = messages[messages.length - 1];
+    messages[messages.length - 1] = {
+      ...last,
+      content: prefix + last.content + suffix,
+    };
+  }
+
+  const { truncated } = await requestAssistantReply(messages, text);
+
+  if (truncated) {
+    await continueTruncatedReply();
+  }
+
+  await maybeSummarize();
 }
 
 async function maybeSummarize() {
